@@ -278,8 +278,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     super.initState();
     //Dror start
     primary = _ListDisplayDetails(const ValueKey('Ping'),
-        scrollController: widget.scrollController ??
-            ScrollController(keepScrollOffset: false));
+        scrollController: widget.scrollController);
 
     secondary = _ListDisplayDetails(const ValueKey('Pong'),
         scrollController: ScrollController(keepScrollOffset: false));
