@@ -39,6 +39,9 @@ class ScrollablePositionedList extends StatefulWidget {
     required this.itemBuilder,
     Key? key,
     this.itemScrollController,
+    // Dror star
+    required this.scrollController,
+    // Dror end
     ItemPositionsListener? itemPositionsListener,
     this.initialScrollIndex = 0,
     this.initialAlignment = 0,
@@ -65,6 +68,9 @@ class ScrollablePositionedList extends StatefulWidget {
     required this.separatorBuilder,
     Key? key,
     this.itemScrollController,
+    // Dror start
+    required this.scrollController,
+    // Dror end
     ItemPositionsListener? itemPositionsListener,
     this.initialScrollIndex = 0,
     this.initialAlignment = 0,
@@ -96,6 +102,11 @@ class ScrollablePositionedList extends StatefulWidget {
 
   /// Controller for jumping or scrolling to an item.
   final ItemScrollController? itemScrollController;
+
+  // DROR
+  // Normal scroll controller for offset - used to follow the front list
+  final ScrollController scrollController;
+  // Dror end
 
   /// Notifier that reports the items laid out in the list after each frame.
   final ItemPositionsNotifier? itemPositionsNotifier;
@@ -248,11 +259,13 @@ class ItemScrollController {
 class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     with TickerProviderStateMixin {
   /// Details for the primary (active) [ListView].
-  var primary = _ListDisplayDetails(const ValueKey('Ping'));
+  /// Dror start
+  var primary;
 
   /// Details for the secondary (transitional) [ListView] that is temporarily
   /// shown when scrolling a long distance.
-  var secondary = _ListDisplayDetails(const ValueKey('Pong'));
+  var secondary;
+  // Dror end
 
   final opacity = ProxyAnimation(const AlwaysStoppedAnimation<double>(0));
 
@@ -263,6 +276,14 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
   @override
   void initState() {
     super.initState();
+    //Dror start
+    primary = _ListDisplayDetails(const ValueKey('Ping'),
+        scrollController: widget.scrollController ??
+            ScrollController(keepScrollOffset: false));
+
+    secondary = _ListDisplayDetails(const ValueKey('Pong'),
+        scrollController: ScrollController(keepScrollOffset: false));
+    // Dror end
     ItemPosition? initialPosition = PageStorage.of(context)!.readState(context);
     primary.target = initialPosition?.index ?? widget.initialScrollIndex;
     primary.alignment =
@@ -551,7 +572,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     if (itemPositions.isNotEmpty) {
       PageStorage.of(context)!.writeState(
           context,
-          itemPositions.reduce((value, element) =>
+          itemPositions.reduce((ItemPosition value, ItemPosition element) =>
               value.itemLeadingEdge < element.itemLeadingEdge
                   ? value
                   : element));
@@ -561,10 +582,10 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
 }
 
 class _ListDisplayDetails {
-  _ListDisplayDetails(this.key);
+  _ListDisplayDetails(this.key, {required this.scrollController});
 
   final itemPositionsNotifier = ItemPositionsNotifier();
-  final scrollController = ScrollController(keepScrollOffset: false);
+  final ScrollController scrollController;
 
   /// The index of the item to scroll to.
   int target = 0;
